@@ -7,7 +7,9 @@ node <- node_number(read.csv("/t/cells_synthetic.csv", stringsAsFactors = FALSE)
 meta <- unlist(m$metaclustering)
 pop <- c("pop A", "pop B", "pop C", "pop D", "pop E")[meta[node]]
 group <- factor(rep(c("group 1", "group 2"), length.out = length(node)))
+m <- relabel_markers(m, c("CD3", "CD19", "CD14", "CD56"))
 fs <- rebuild_fsom(m, node)
+stopifnot(identical(colnames(fs$map$codes), m$markers))
 stopifnot(nrow(fs$map$codes) == 100, sum(is.na(fs$map$medianValues[, 1])) == 14)
 # The tree is built from the codes: one edge fewer than nodes.
 stopifnot(igraph::ecount(fs$MST$graph) == 99)

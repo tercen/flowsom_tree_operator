@@ -50,6 +50,14 @@ read_model <- function(json) {
   m
 }
 
+# Rename the markers (codes, medians and the list itself), keeping their order.
+relabel_markers <- function(m, labels) {
+  if (anyDuplicated(labels)) stop("marker labels are not unique: ", paste(labels[duplicated(labels)], collapse = ", "))
+  m$markers <- labels
+  colnames(m$codes) <- colnames(m$medians) <- labels
+  m
+}
+
 # Node number from a label like "c007" (or 7).
 node_number <- function(x) as.integer(gsub("[^0-9]", "", as.character(x)))
 

@@ -46,6 +46,12 @@
     },
     {
       "kind": "StringProperty",
+      "name": "marker_label_factor",
+      "defaultValue": "",
+      "description": "Row factor to name the markers by (for example c.antigen), when the FlowSOM step's first row factor is the FCS channel. Empty: the names in the model."
+    },
+    {
+      "kind": "StringProperty",
       "name": "population_palette",
       "defaultValue": "tab20",
       "description": "Palette for populations, assigned to the sorted population names, as Tercen's Plot operator does: tab20, tab10, Palette-1, Set1 or Dark2."

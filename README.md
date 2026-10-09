@@ -46,7 +46,8 @@ export picks them up. Files are named so they sort into reading order:
 | `population_factor` | | colours each node by its cells' most common population (an empty node: its metacluster's); empty = by metacluster |
 | `group_factor` | | the pies; empty = no pie plot |
 | `plots` | `stars, numbers, grid, pies, markers` | which plots |
-| `markers` | | per-marker trees; empty = every marker in the model |
+| `markers` | | per-marker trees (by their label); empty = every marker in the model |
+| `marker_label_factor` | | a row factor to name markers by (e.g. `c.antigen`) when the FlowSOM step's first row factor is the FCS channel; project it on rows too |
 | `population_palette` | `tab20` | colours for the sorted populations, as Tercen's Plot operator assigns them (`tab20`, `tab10`, `Palette-1`, `Set1`, `Dark2`) |
 | `group_palette` | `Palette-1` | colours for the sorted groups |
 | `max_node_size` | 1 | FlowSOM's `maxNodeSize` |

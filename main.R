@@ -23,6 +23,7 @@ s <- list(
   population_factor = trimws(prop("population_factor", "")),
   group_factor = trimws(prop("group_factor", "")),
   markers = trimws(prop("markers", "")),
+  marker_label_factor = trimws(prop("marker_label_factor", "")),
   plots = prop("plots", "stars, numbers, grid, pies, markers"),
   population_palette = prop("population_palette", "tab20"),
   group_palette = prop("group_palette", "Palette-1"),
@@ -43,6 +44,20 @@ models <- unique(ctx$rselect(model_col)[[1]])
 models <- models[!is.na(models) & nchar(models) > 0]
 if (length(models) != 1) stop("expected one FlowSOM model on rows, found ", length(models))
 m <- read_model(models)
+
+# Marker names: the model names a marker by the FlowSOM step's first row factor (often the FCS
+# channel). `marker_label_factor` relabels them with another row factor (often the antigen), read
+# off the row table: the key is the row factor whose values include every model marker.
+if (nchar(s$marker_label_factor) > 0) {
+  if (!s$marker_label_factor %in% rnames) {
+    stop("marker_label_factor '", s$marker_label_factor, "' is not a row factor; found: ", paste(rnames, collapse = ", "))
+  }
+  rt <- ctx$rselect(as.list(setdiff(rnames, model_col)))
+  key <- Filter(function(n) all(m$markers %in% as.character(rt[[n]])), setdiff(names(rt), model_col))
+  if (!length(key)) stop("no row factor holds the model's markers (", paste(head(m$markers, 3), collapse = ", "), ", ...)")
+  lab <- as.character(rt[[s$marker_label_factor]])[match(m$markers, as.character(rt[[key[1]]]))]
+  m <- relabel_markers(m, ifelse(is.na(lab) | lab == "", m$markers, lab))
+}
 
 # The cells: node, and the optional population and group.
 cnames <- unlist(ctx$cnames)
