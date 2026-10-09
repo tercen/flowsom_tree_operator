@@ -1,0 +1,175 @@
+{
+  "name": "FlowSOM tree",
+  "description": "Draws FlowSOM's tree (minimum spanning tree) with star, number, pie and per-marker views, and the stars on the SOM grid, from the model a FlowSOM step (flowsom_operator >= 2.2.0) writes. The tree is FlowSOM's own: built from the map's codes, not re-estimated from the cell labels.",
+  "tags": [
+    "cytometry",
+    "flowsom",
+    "data visualisation"
+  ],
+  "authors": [
+    "tercen"
+  ],
+  "urls": [
+    "https://github.com/tercen/flowsom_tree_operator"
+  ],
+  "container": "ghcr.io/tercen/flowsom_tree_operator:1.0.0",
+  "properties": [
+    {
+      "kind": "StringProperty",
+      "name": "node_factor",
+      "defaultValue": "",
+      "description": "Column factor holding each cell's SOM node (cluster_id of the FlowSOM step). Empty: the one column factor whose name ends in cluster_id."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "population_factor",
+      "defaultValue": "",
+      "description": "Column factor naming each cell's population. Each node is coloured by the population most of its cells have. Empty: colour by metacluster."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "group_factor",
+      "defaultValue": "",
+      "description": "Column factor for the pies: each node's cells split by this factor (for example disease group). Empty: no pie plot."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "plots",
+      "defaultValue": "stars, numbers, grid, pies, markers",
+      "description": "Which plots, comma-separated: stars (stars on the tree), numbers (node numbers on the tree), grid (stars on the SOM grid), pies (cells per group on the tree), markers (one tree per marker)."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "markers",
+      "defaultValue": "",
+      "description": "Markers for the per-marker trees, comma-separated. Empty: every marker of the model."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "population_palette",
+      "defaultValue": "tab20",
+      "description": "Palette for populations, assigned to the sorted population names, as Tercen's Plot operator does: tab20, tab10, Palette-1, Set1 or Dark2."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "group_palette",
+      "defaultValue": "Palette-1",
+      "description": "Palette for the pie groups (sorted): tab20, tab10, Palette-1, Set1 or Dark2."
+    },
+    {
+      "kind": "DoubleProperty",
+      "name": "max_node_size",
+      "defaultValue": 1,
+      "description": "Largest node size, FlowSOM's maxNodeSize."
+    },
+    {
+      "kind": "DoubleProperty",
+      "name": "plot_width",
+      "defaultValue": 9,
+      "description": "Image width in inches."
+    },
+    {
+      "kind": "DoubleProperty",
+      "name": "plot_height",
+      "defaultValue": 7,
+      "description": "Image height in inches."
+    },
+    {
+      "kind": "DoubleProperty",
+      "name": "dpi",
+      "defaultValue": 150,
+      "description": "Image resolution, dots per inch."
+    }
+  ],
+  "operatorSpec": {
+    "kind": "OperatorSpec",
+    "ontologyUri": "https://tercen.com/_ontology/tercen",
+    "ontologyVersion": "0.0.1",
+    "inputSpecs": [
+      {
+        "kind": "CrosstabSpec",
+        "metaFactors": [
+          {
+            "kind": "MetaFactor",
+            "name": "Model",
+            "type": "",
+            "description": "The channel and the flowsom_model column of a FlowSOM (>= 2.2.0) step. The model is the same on every row.",
+            "ontologyMapping": "variable",
+            "crosstabMapping": "row",
+            "cardinality": "1..n",
+            "factors": []
+          },
+          {
+            "kind": "MetaFactor",
+            "name": "Cells",
+            "type": "",
+            "description": "The cells, with the FlowSOM node (cluster_id) and optionally a population and a group factor.",
+            "ontologyMapping": "observation",
+            "crosstabMapping": "column",
+            "cardinality": "1..n",
+            "factors": []
+          }
+        ],
+        "axis": [
+          {
+            "kind": "AxisSpec",
+            "metaFactors": [
+              {
+                "kind": "MetaFactor",
+                "name": "Value",
+                "type": "double",
+                "description": "Any value; not read.",
+                "ontologyMapping": "measurement",
+                "crosstabMapping": "y",
+                "cardinality": "1",
+                "factors": []
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "outputSpecsV2": [
+      {
+        "kind": "OperatorJoinSpec",
+        "description": "Visualization operator - outputs plot files",
+        "joinOperators": [
+          {
+            "kind": "JoinOperator",
+            "joinType": "left",
+            "leftPair": {
+              "kind": "ColumnPair",
+              "lColumns": [],
+              "rColumns": []
+            },
+            "rightRelation": {
+              "kind": "TableRelation",
+              "attributes": [
+                {
+                  "kind": "Attribute",
+                  "name": "filename",
+                  "type": "string"
+                },
+                {
+                  "kind": "Attribute",
+                  "name": "mimetype",
+                  "type": "string"
+                },
+                {
+                  "kind": "Attribute",
+                  "name": "checksum",
+                  "type": "string"
+                },
+                {
+                  "kind": "Attribute",
+                  "name": ".content",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
