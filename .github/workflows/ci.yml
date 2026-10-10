@@ -18,7 +18,8 @@ jobs:
           tags: flowsom_tree_operator:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      # As the operator runs: uid 1000, in a working directory it cannot write (1.0.2 failed there).
       - name: Every plot renders from a real FlowSOM model
-        run: docker run --rm -v "$PWD/ci:/c" --entrypoint Rscript flowsom_tree_operator:ci /c/smoke.R
+        run: docker run --rm -u 1000 -e HOME=/tmp -w /operator -v "$PWD/ci:/c" --entrypoint Rscript flowsom_tree_operator:ci /c/smoke.R
       - name: main.R parses
         run: docker run --rm --entrypoint Rscript flowsom_tree_operator:ci -e 'invisible(parse("/operator/main.R"))'

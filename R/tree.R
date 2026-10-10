@@ -10,6 +10,12 @@ suppressMessages({
   library(jsonlite)
 })
 
+# FlowSOM's plot functions build ggplot/ggarrange objects, which open R's default device. In the
+# operator that is Rplots.pdf in a working directory the runtime user cannot write ("Error in
+# (function (file = ...Rplots.pdf"), so the default device is a null PDF. Images go through
+# save_png, which opens its own device.
+options(device = function(...) grDevices::pdf(NULL))
+
 # Palettes by name, the same lists Tercen's Plot operator uses, so a population has the same
 # colour here as in the workflow's other plots (levels sorted, colours assigned in order).
 PALETTES <- list(

@@ -65,4 +65,6 @@ GPL-2.0-or-later (it calls FlowSOM, GPL ≥ 2). See `LICENSE`.
 
 The smoke test lives in `ci/`, not `tests/`: Tercen's installer reads every `tests/*.json` as a
 platform test (1.0.0 failed on the model fixture) and fails a `tests/` folder with none (1.0.1).
-A platform test of the image table is still to come.
+`tests/test.json` (since 1.0.3) is the platform test: the grid view on a 3x3 model from
+flowsom_operator 2.2 on synthetic data; only the grid, because it does not depend on igraph's
+floating-point tree layout, so the PNG is byte-stable. `ci/gen_test_expected.R` regenerates it.
