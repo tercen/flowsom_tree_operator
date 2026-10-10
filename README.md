@@ -55,7 +55,7 @@ export picks them up. Files are named so they sort into reading order:
 
 ## Tests
 
-`tests/smoke.R` renders every plot from the model `flowsom_operator` 2.2.0 writes on its own
+`ci/smoke.R` renders every plot from the model `flowsom_operator` 2.2.0 writes on its own
 platform test (synthetic data) and checks the tree has one edge fewer than nodes; CI runs it in
 the built image.
 
@@ -63,5 +63,6 @@ the built image.
 
 GPL-2.0-or-later (it calls FlowSOM, GPL ≥ 2). See `LICENSE`.
 
-Note: the model fixture is `tests/model_synthetic.txt`, not `.json`: Tercen's installer treats
-every `.json` under `tests/` as a platform test (1.0.0's install check failed on it).
+The smoke test lives in `ci/`, not `tests/`: Tercen's installer reads every `tests/*.json` as a
+platform test (1.0.0 failed on the model fixture) and fails a `tests/` folder with none (1.0.1).
+A platform test of the image table is still to come.

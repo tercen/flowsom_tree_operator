@@ -1,9 +1,9 @@
 # Every plot renders from a real model: the one flowsom_operator 2.2.0 writes on its own
 # platform test (synthetic data, 3000 cells x 4 markers, 10x10 map, 14 empty nodes). Run in the
-# image: docker run --rm -v "$PWD/tests:/t" --entrypoint Rscript <image> /t/smoke.R
+# image: docker run --rm -v "$PWD/ci:/c" --entrypoint Rscript <image> /c/smoke.R
 source("/operator/R/tree.R")
-m <- read_model(paste(readLines("/t/model_synthetic.txt", warn = FALSE), collapse = ""))
-node <- node_number(read.csv("/t/cells_synthetic.csv", stringsAsFactors = FALSE)$node)
+m <- read_model(paste(readLines("/c/model_synthetic.txt", warn = FALSE), collapse = ""))
+node <- node_number(read.csv("/c/cells_synthetic.csv", stringsAsFactors = FALSE)$node)
 meta <- unlist(m$metaclustering)
 pop <- c("pop A", "pop B", "pop C", "pop D", "pop E")[meta[node]]
 group <- factor(rep(c("group 1", "group 2"), length.out = length(node)))

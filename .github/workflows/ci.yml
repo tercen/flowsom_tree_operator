@@ -19,6 +19,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Every plot renders from a real FlowSOM model
-        run: docker run --rm -v "$PWD/tests:/t" --entrypoint Rscript flowsom_tree_operator:ci /t/smoke.R
+        run: docker run --rm -v "$PWD/ci:/c" --entrypoint Rscript flowsom_tree_operator:ci /c/smoke.R
       - name: main.R parses
         run: docker run --rm --entrypoint Rscript flowsom_tree_operator:ci -e 'invisible(parse("/operator/main.R"))'
