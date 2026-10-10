@@ -12,7 +12,7 @@
   "urls": [
     "https://github.com/tercen/flowsom_tree_operator"
   ],
-  "container": "ghcr.io/tercen/flowsom_tree_operator:1.0.3",
+  "container": "ghcr.io/tercen/flowsom_tree_operator:1.1.0",
   "properties": [
     {
       "kind": "StringProperty",
@@ -85,6 +85,18 @@
       "name": "dpi",
       "defaultValue": 150,
       "description": "Image resolution, dots per inch."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "model_column",
+      "defaultValue": "",
+      "description": "The model column to draw when more than one FlowSOM step is upstream, for example ds5.flowsom_model. Empty: the one column ending in flowsom_model."
+    },
+    {
+      "kind": "StringProperty",
+      "name": "tree_layout",
+      "defaultValue": "unweighted",
+      "description": "How the tree is laid out (its edges are FlowSOM's either way): unweighted, every edge the same length, as Python FlowSOM draws it and every node readable; or weighted, R FlowSOM's BuildMST layout, edges as long as the distance between the nodes' codes, where a population split over many similar nodes packs into a knot."
     }
   ],
   "operatorSpec": {
@@ -97,9 +109,9 @@
         "metaFactors": [
           {
             "kind": "MetaFactor",
-            "name": "Model",
+            "name": "Channel",
             "type": "",
-            "description": "The channel and the flowsom_model column of a FlowSOM (>= 2.2.0) step. The model is the same on every row.",
+            "description": "The channel (and optionally a factor to name markers by, e.g. c.antigen). The model is read from the FlowSOM step upstream; it is not projected.",
             "ontologyMapping": "variable",
             "crosstabMapping": "row",
             "cardinality": "1..n",

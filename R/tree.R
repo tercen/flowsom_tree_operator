@@ -45,7 +45,12 @@ read_model <- function(json) {
   if (m$version != 1) stop("flowsom_model version ", m$version, " is not supported (expected 1)")
   ncodes <- m$xdim * m$ydim
   p <- length(m$markers)
-  codes <- matrix(unlist(m$codes), nrow = ncodes, ncol = p, byrow = TRUE)
+  # jsonlite turns the list of per-node vectors into a nodes x markers matrix already; anything
+  # else (a list, when lengths differ) is bound row by row. Never unlist a matrix: that reads it
+  # column-major and scrambles the codes (1.0.x did, and drew a wrong tree).
+  codes <- if (is.matrix(m$codes)) m$codes else do.call(rbind, lapply(m$codes, unlist))
+  storage.mode(codes) <- "double"
+  if (!identical(dim(codes), c(as.integer(ncodes), p))) stop("model codes are ", paste(dim(codes), collapse = "x"), ", expected ", ncodes, "x", p)
   # medians: one vector per node, NULL for an empty node.
   med <- matrix(NA_real_, nrow = ncodes, ncol = p)
   meds <- if (is.list(m$medians)) m$medians else lapply(seq_len(nrow(m$medians)), function(k) m$medians[k, ])
@@ -64,13 +69,61 @@ relabel_markers <- function(m, labels) {
   m
 }
 
+# The tables upstream of a step that hold a FlowSOM model: walk the query's relation (as
+# tim::find_schema_by_factor_name does) and keep each simple relation with a column named
+# `column`, or ending in `flowsom_model` when `column` is empty. Returns list(id, column).
+find_model_tables <- function(relation, get_schema, column = "") {
+  ids <- character(0)
+  visit <- function(r) {
+    if (is.null(r)) return()
+    if (inherits(r, "SimpleRelation")) ids <<- c(ids, r$id)
+    else if (inherits(r, "CompositeRelation")) {
+      visit(r$mainRelation)
+      for (j in r$joinOperators) visit(j$rightRelation)
+    } else if (inherits(r, "UnionRelation")) for (x in r$relations) visit(x)
+    else if (!is.null(r$relation)) visit(r$relation)
+  }
+  visit(relation)
+  out <- list()
+  for (id in unique(ids)) {
+    names <- vapply(get_schema(id)$columns, function(c) c$name, "")
+    hit <- if (nchar(column) > 0) names[names == column] else names[grepl("flowsom_model$", names)]
+    for (h in hit) out[[length(out) + 1]] <- list(id = id, column = h)
+  }
+  out
+}
+
+# The computed relations of every step upstream of `step_id` in a workflow, nearest first.
+# Tercen prunes a step's query to the tables its projection uses, so a FlowSOM model that is not
+# projected is not in the query; it is in the FlowSOM step's own computed relation.
+upstream_relations <- function(wf, step_id) {
+  owner <- list()
+  for (st in wf$steps) for (p in st$outputs) owner[[p$id]] <- st
+  feeds <- list()
+  for (l in wf$links) feeds[[l$inputId]] <- l$outputId
+  by_id <- list(); for (st in wf$steps) by_id[[st$id]] <- st
+  seen <- character(0); queue <- list(by_id[[step_id]]); out <- list()
+  while (length(queue)) {
+    st <- queue[[1]]; queue <- queue[-1]
+    for (p in st$inputs) {
+      src <- owner[[feeds[[p$id]] %||% ""]]
+      if (is.null(src) || src$id %in% seen) next
+      seen <- c(seen, src$id)
+      if (!is.null(src$computedRelation)) out[[length(out) + 1]] <- src$computedRelation
+      queue[[length(queue) + 1]] <- src
+    }
+  }
+  out
+}
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 # Node number from a label like "c007" (or 7).
 node_number <- function(x) as.integer(gsub("[^0-9]", "", as.character(x)))
 
 # A FlowSOM object for the model, with `node` the node of each projected cell (1-based). The
 # node sizes are the model's own counts (every cell the map assigned); the cells here are used
 # only for the pies and the node labels.
-rebuild_fsom <- function(m, node) {
+rebuild_fsom <- function(m, node, layout = "unweighted") {
   ncodes <- nrow(m$codes)
   # FlowSOM computes metacluster MFIs from `data`, one row per cell. Nothing drawn here uses
   # them (stars and markers read the node medians), so each cell stands in as its node's median.
@@ -87,7 +140,17 @@ rebuild_fsom <- function(m, node) {
   fs$map$cvValues <- fs$map$sdValues <- fs$map$madValues <- m$medians
   fs$metaclustering <- factor(unlist(m$metaclustering))
   class(fs) <- "FlowSOM"
-  BuildMST(fs)
+  fs <- BuildMST(fs)
+  # The tree (its edges) is FlowSOM's either way; only where the nodes are drawn differs. R's
+  # BuildMST lays it out with Kamada-Kawai weighted by code distance, so near-identical nodes
+  # (a large population split over many nodes) pile up in a knot. Python FlowSOM, which the run-9
+  # figures used, lays out the same tree unweighted: every edge one length, every node readable.
+  if (layout == "unweighted") {
+    fs$MST$l <- igraph::layout_with_kk(fs$MST$graph, weights = NA)
+  } else if (layout != "weighted") {
+    stop("tree_layout must be unweighted or weighted, got '", layout, "'")
+  }
+  fs
 }
 
 # The label of every node: the most common population among its cells; an empty node takes the
@@ -147,6 +210,9 @@ tree_plots <- function(fs, bg, bg_colors, group = NULL, group_colors = NULL,
 }
 
 save_png <- function(p, file, width, height, dpi) {
+  # The grid is square and FlowSOM puts the legends beside it: give it the room, or the
+  # population legend is drawn over the grid's right-hand columns.
+  if (grepl("SOM grid", basename(file))) width <- max(width, height * 1.9)
   grDevices::png(file, width = width, height = height, units = "in", res = dpi, type = "cairo",
                  bg = "white")
   on.exit(grDevices::dev.off())

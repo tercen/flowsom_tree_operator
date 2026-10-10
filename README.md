@@ -17,7 +17,7 @@ the serialised R object that FlowSOM 1.x operators wrote and the Rust FlowSOM (2
 
 | | |
 |---|---|
-| rows | the channel and `<ns>.flowsom_model` of the FlowSOM step (the same model on every row) |
+| rows | the channel (and a factor to name markers by, e.g. `c.antigen`). The model is **not** projected: Tercen's engine cannot use a string over 4096 bytes as a factor, and a model is tens of KB. The operator reads it from the nearest FlowSOM (≥ 2.2.0) step upstream |
 | columns | the cells, with `<ns>.cluster_id` (the SOM node), and optionally a population factor and a group factor |
 | y | any value; not read |
 
@@ -50,13 +50,16 @@ export picks them up. Files are named so they sort into reading order:
 | `marker_label_factor` | | a row factor to name markers by (e.g. `c.antigen`) when the FlowSOM step's first row factor is the FCS channel; project it on rows too |
 | `population_palette` | `tab20` | colours for the sorted populations, as Tercen's Plot operator assigns them (`tab20`, `tab10`, `Palette-1`, `Set1`, `Dark2`) |
 | `group_palette` | `Palette-1` | colours for the sorted groups |
+| `model_column` | | which model, when several FlowSOM steps are upstream (e.g. `ds5.flowsom_model`); empty = the nearest |
+| `tree_layout` | `unweighted` | `unweighted`: every edge one length, as Python FlowSOM (and run 9) draws it; `weighted`: R `BuildMST`'s layout, edge length = code distance, where a population split over many similar nodes packs into a knot. The tree's edges are FlowSOM's either way |
 | `max_node_size` | 1 | FlowSOM's `maxNodeSize` |
 | `plot_width`, `plot_height`, `dpi` | 9, 7, 150 | image size in inches and resolution |
 
 ## Tests
 
 `ci/smoke.R` renders every plot from the model `flowsom_operator` 2.2.0 writes on its own
-platform test (synthetic data) and checks the tree has one edge fewer than nodes; CI runs it in
+platform test (synthetic data), checks the codes are read node by node, and that the tree is
+the minimum spanning tree of those codes (1.0.x read the codes scrambled and drew a wrong tree); CI runs it in
 the built image.
 
 ## Licence

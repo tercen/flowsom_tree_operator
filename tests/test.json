@@ -13,8 +13,7 @@
     "group"
   ],
   "rows": [
-    "channel",
-    "flowsom_model"
+    "channel"
   ],
   "colors": [],
   "labels": [],
@@ -23,11 +22,35 @@
   "generatedOn": "10/10/2026 02:30:00 AM 2026",
   "version": "",
   "propertyValues": [
-    {"kind": "PropertyValue", "name": "node_factor", "value": "cluster_id"},
-    {"kind": "PropertyValue", "name": "population_factor", "value": "population"},
-    {"kind": "PropertyValue", "name": "plots", "value": "grid"},
-    {"kind": "PropertyValue", "name": "plot_width", "value": "6"},
-    {"kind": "PropertyValue", "name": "plot_height", "value": "5"},
-    {"kind": "PropertyValue", "name": "dpi", "value": "50"}
+    {
+      "kind": "PropertyValue",
+      "name": "node_factor",
+      "value": "cluster_id"
+    },
+    {
+      "kind": "PropertyValue",
+      "name": "population_factor",
+      "value": "population"
+    },
+    {
+      "kind": "PropertyValue",
+      "name": "plots",
+      "value": "grid"
+    },
+    {
+      "kind": "PropertyValue",
+      "name": "plot_width",
+      "value": "6"
+    },
+    {
+      "kind": "PropertyValue",
+      "name": "plot_height",
+      "value": "5"
+    },
+    {
+      "kind": "PropertyValue",
+      "name": "dpi",
+      "value": "50"
+    }
   ]
 }
