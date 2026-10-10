@@ -2,7 +2,7 @@
 # platform test (synthetic data, 3000 cells x 4 markers, 10x10 map, 14 empty nodes). Run in the
 # image: docker run --rm -v "$PWD/tests:/t" --entrypoint Rscript <image> /t/smoke.R
 source("/operator/R/tree.R")
-m <- read_model(paste(readLines("/t/model_synthetic.json", warn = FALSE), collapse = ""))
+m <- read_model(paste(readLines("/t/model_synthetic.txt", warn = FALSE), collapse = ""))
 node <- node_number(read.csv("/t/cells_synthetic.csv", stringsAsFactors = FALSE)$node)
 meta <- unlist(m$metaclustering)
 pop <- c("pop A", "pop B", "pop C", "pop D", "pop E")[meta[node]]

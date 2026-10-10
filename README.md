@@ -62,3 +62,6 @@ the built image.
 ## Licence
 
 GPL-2.0-or-later (it calls FlowSOM, GPL ≥ 2). See `LICENSE`.
+
+Note: the model fixture is `tests/model_synthetic.txt`, not `.json`: Tercen's installer treats
+every `.json` under `tests/` as a platform test (1.0.0's install check failed on it).
